@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from enum import Enum, auto
 
@@ -10,21 +11,22 @@ class AccountStatusEnum(Enum):
 
 
 class Account:
-    def __init__(self, name):
+    def __init__(self, name, ledger: Ledger):
         self.name = name
-        self._ledger = Ledger()
+        self._ledger = ledger
         self._status = AccountStatusEnum.ACTIVE
+        self._id = str(uuid.uuid4())
 
     def deposit(self, amount: Decimal):
         assert amount > 0, "Cannot deposit negative amounts"
         assert not self.is_blocked, "Account is blocked"
-        self._ledger.new_transaction(amount)
+        self._ledger.new_transaction(self._id, amount)
 
     def withdraw(self, amount: Decimal):
         assert amount > 0, "Cannot withdraw negative amounts"
         assert self.balance >= amount, "Insufficient funds"
         assert not self.is_blocked, "Account is blocked"
-        self._ledger.new_transaction(-1 * amount)
+        self._ledger.new_transaction(self._id, -1 * amount)
 
     def transfer(self, amount, target: "Account"):
         self.withdraw(amount)
@@ -35,11 +37,11 @@ class Account:
 
     @property
     def balance(self):
-        return sum([transaction.amount for transaction in self._ledger.transactions])
+        return sum([transaction.amount for transaction in self._ledger.transactions if transaction.owner == self._id])
 
     @property
     def is_blocked(self):
         return self._status == AccountStatusEnum.BLOCKED
 
     def __str__(self):
-        return f"{self.name} has {self.balance}"
+        return f"{self._id}|{self.name} has {self.balance}"
