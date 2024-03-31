@@ -20,12 +20,14 @@ class Account:
     def deposit(self, amount: Decimal):
         assert amount > 0, "Cannot deposit negative amounts"
         assert not self.is_blocked, "Account is blocked"
+        # TODO: could run verify here
         self._ledger.new_transaction(self._id, amount)
 
     def withdraw(self, amount: Decimal):
         assert amount > 0, "Cannot withdraw negative amounts"
         assert self.balance >= amount, "Insufficient funds"
         assert not self.is_blocked, "Account is blocked"
+        # TODO: could run verify here
         self._ledger.new_transaction(self._id, -1 * amount)
 
     def transfer(self, amount, target: "Account"):
@@ -37,7 +39,8 @@ class Account:
 
     @property
     def balance(self):
-        return sum([transaction.amount for transaction in self._ledger.transactions if transaction.owner == self._id])
+        # TODO: needs some caching in order to be efficient
+        return sum([transaction.amount for transaction in self._ledger.get_account_transactions(self._id)])
 
     @property
     def is_blocked(self):

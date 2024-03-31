@@ -53,5 +53,13 @@ class Ledger:
                 raise ValueError(f"Transaction {self._transactions[i]} is invalid")
         return True
 
+    def get_account_transactions(self, account_id):
+        for transaction in self._transactions:
+            if transaction.owner == account_id:
+                yield transaction
+
     def __str__(self):
         return "\n".join([str(transaction) for transaction in self._transactions])
+
+    def __hash__(self):
+        return hash(self._transactions)
