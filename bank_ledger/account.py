@@ -23,7 +23,7 @@ class Account:
 
     @property
     def balance(self):
-        return sum([transaction.amount for transaction in self._ledger.transactions])
+        return sum([transaction.amount for transaction in self._ledger._transactions])
 
     def __str__(self):
         return f"{self.name} has {self.balance}"

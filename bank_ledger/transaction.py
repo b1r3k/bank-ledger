@@ -22,12 +22,12 @@ GENESIS_TRANSACTION = Transaction(Decimal(0), 0, sha256("troi".encode()).hexdige
 
 class Ledger:
     def __init__(self):
-        self.transactions = [GENESIS_TRANSACTION]
+        self._transactions = (GENESIS_TRANSACTION,)
 
     def new_transaction(self, amount: Decimal):
-        new_transaction = Transaction(amount, int(time.time()), self.transactions[-1].hash)
-        self.transactions.append(new_transaction)
+        new_transaction = Transaction(amount, int(time.time()), self._transactions[-1].hash)
+        self._transactions += (new_transaction,)
         return new_transaction
 
     def __str__(self):
-        return "\n".join([str(transaction) for transaction in self.transactions])
+        return "\n".join([str(transaction) for transaction in self._transactions])
