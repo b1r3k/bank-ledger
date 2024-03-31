@@ -36,6 +36,10 @@ class Ledger:
     def __init__(self):
         self._transactions = (GENESIS_TRANSACTION,)
 
+    @property
+    def transactions(self):
+        return self._transactions
+
     def new_transaction(self, amount: Decimal):
         new_transaction = Transaction(amount, int(time.time()), self._transactions[-1].hash)
         self._transactions += (new_transaction,)

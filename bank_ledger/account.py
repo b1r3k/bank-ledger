@@ -35,7 +35,7 @@ class Account:
 
     @property
     def balance(self):
-        return sum([transaction.amount for transaction in self._ledger._transactions])
+        return sum([transaction.amount for transaction in self._ledger.transactions])
 
     @property
     def is_blocked(self):
