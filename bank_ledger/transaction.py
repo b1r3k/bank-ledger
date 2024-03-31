@@ -1,3 +1,4 @@
+import functools
 import time
 from decimal import Decimal
 from hashlib import sha256
@@ -10,13 +11,21 @@ class Transaction:
         self.amount = amount
         self.timestamp = timestamp
         self.prev_transaction_hash = prev_transaction_hash
-        self.hash = self.__hash__()
+        self._hash = self._calc_hash()
 
     def __str__(self):
         return f"{self.timestamp}:{self.owner}:{self.amount}:{self.prev_transaction_hash}"
 
+    def _calc_hash(self):
+        hexdigest = sha256(str(self).encode()).hexdigest()
+        return hexdigest
+
+    @property
+    def hash(self):
+        return self._hash or self._calc_hash()
+
     def __hash__(self):
-        return sha256(str(self).encode()).hexdigest()
+        return hash(self.hash)
 
 
 GENESIS_TRANSACTION = Transaction("penelope", Decimal(0), 0, sha256("troi".encode()).hexdigest())
@@ -45,6 +54,8 @@ class Ledger:
     def new_transaction(self, owner: str, amount: Decimal):
         new_transaction = Transaction(owner, amount, int(time.time()), self._transactions[-1].hash)
         self._transactions += (new_transaction,)
+        # TODO: should remove only the cache for the account
+        self.get_account_transactions.cache_clear()
         return new_transaction
 
     def verify(self):
@@ -53,6 +64,7 @@ class Ledger:
                 raise ValueError(f"Transaction {self._transactions[i]} is invalid")
         return True
 
+    @functools.lru_cache
     def get_account_transactions(self, account_id):
         for transaction in self._transactions:
             if transaction.owner == account_id:
@@ -62,4 +74,6 @@ class Ledger:
         return "\n".join([str(transaction) for transaction in self._transactions])
 
     def __hash__(self):
-        return hash(self._transactions)
+        h = hash(self._transactions)
+        print(h)
+        return h

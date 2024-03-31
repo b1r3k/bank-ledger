@@ -39,7 +39,6 @@ class Account:
 
     @property
     def balance(self):
-        # TODO: needs some caching in order to be efficient
         return sum([transaction.amount for transaction in self._ledger.get_account_transactions(self._id)])
 
     @property
