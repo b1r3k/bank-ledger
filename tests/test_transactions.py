@@ -2,7 +2,12 @@ from decimal import Decimal
 from unittest import TestCase
 
 from bank_ledger.account import Account
-from bank_ledger.transaction import GENESIS_TRANSACTION, Transaction
+from bank_ledger.transaction import (
+    GENESIS_TRANSACTION,
+    Ledger,
+    Transaction,
+    validate_transaction,
+)
 
 
 class TestTransactions(TestCase):
@@ -14,6 +19,34 @@ class TestTransactions(TestCase):
         transaction = Transaction(Decimal(10.0), 0, GENESIS_TRANSACTION.hash)
         transaction_list = [transaction]
         self.assertEqual(len(transaction_list), 1)
+
+
+class TestLedger(TestCase):
+    def setUp(self):
+        self.ledger = Ledger()
+
+    def test_transaction_validation(self):
+        t1 = self.ledger.new_transaction(Decimal(10.0))
+        t2 = self.ledger.new_transaction(Decimal(5.0))
+        self.assertTrue(validate_transaction(t1, t2))
+
+    def test_transaction_validation_fails(self):
+        t1 = self.ledger.new_transaction(Decimal(10.0))
+        t2 = self.ledger.new_transaction(Decimal(5.0))
+        t2.amount = Decimal(6.0)
+        self.assertFalse(validate_transaction(t2, t1))
+
+    def test_transaction_verification(self):
+        self.ledger.new_transaction(Decimal(10.0))
+        self.ledger.new_transaction(Decimal(5.0))
+        self.assertTrue(self.ledger.verify())
+
+    def test_transaction_verification_fails(self):
+        self.ledger.new_transaction(Decimal(10.0))
+        self.ledger.new_transaction(Decimal(5.0))
+        self.ledger._transactions[1].amount = Decimal(6.0)
+        with self.assertRaises(ValueError):
+            self.ledger.verify()
 
 
 class TestAccount(TestCase):
