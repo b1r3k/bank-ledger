@@ -55,3 +55,9 @@ class TestAccount(TestCase):
         account.deposit(Decimal(10.0))
         with self.assertRaises(AssertionError):
             account.withdraw(Decimal(15.0))
+
+    def test_blocked_account_deposit(self):
+        account = Account("Bob")
+        account.block()
+        with self.assertRaises(AssertionError):
+            account.deposit(Decimal(10.0))
